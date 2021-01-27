@@ -17,6 +17,7 @@ app.get('/book', (req, res) => {
   
   return res.json({
     book:[{
+      _id:1,
       title:"title",
       author:"hello world",
       isbn:"random",
@@ -37,7 +38,13 @@ app.post('/book', (req, res) => {
 
 app.get('/member', (req, res) => {
   return res.json({
-    member:[]
+    member:[{ 
+      _id:1,
+      name: 'skdlsk', 
+      kelas: 'skdskld',
+      borrowedBooks:{
+        books:[]
+      }}]
   })
 })
 
