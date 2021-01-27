@@ -1,101 +1,45 @@
-require('dotenv').config()
-
 const express = require('express')
 const app = express()
-const port = 3000
-const Subscriber = require('./models/subscriber')
+const port = 5000
+const cors = require('cors')
 
-//connect to mongodb
-const mongoose = require('mongoose')
-mongoose.connect(process.env.DATABASE_URL,
-{ useNewUrlParser: true, useUnifiedTopology: true})
-const db = mongoose.connection
-db.on('error',(error)=>console.error(error))
-db.once('open',()=>console.log('connected to database'))
-
-//setup so that express can accept json
+app.use(cors())
 app.use(express.json())
 
-
-//get all subscribers
-app.get('/subscriber', async (req, res) => {
-  // res.send('Hello World!')
-  try{
-    const subscribers = await Subscriber.find()
-    res.json(subscribers)
-  }catch(err){
-    res.status(500).json({'message':err})
-  }
+app.post('/login', (req, res) => {
+    return res.json({
+      token:'token',
+      username:"adi"
+    })
 })
 
-
-//get subscriber by id
-app.get('/subscriber/:id', async (req, res) => {
-  try{
-    const subscriber = await Subscriber.findById(req.params.id)  
-    if(subscriber){
-      return res.json(subscriber)  
-    }
-    return res.status(404).json({'message':"can't find subscriber"})
-  }catch(err){
-    res.status(500).json({'message':err.message})
-  }
-})
-
-//delete subscriber
-app.delete('/subscriber/:id', async (req, res) => {
-  try{
-    const subscriber = await Subscriber.findById(req.params.id)  
-    if(subscriber){
-      await subscriber.remove()
-      return res.json({'message':'deleted'})  
-    }
-    return res.json({'message':'cannot find subscriber'})
-  }catch(err){
-    res.status(500).json({'message':err.message})
-  }
-})
-
-
-//add new subscriber
-app.post('/subscriber/add', async (req, res) => {
-  const subscriber = new Subscriber({
-    name:req.body.name,
-    subscribedToChannel:req.body.subscribedToChannel
+app.get('/book', (req, res) => {
+  
+  return res.json({
+    book:[{
+      title:"title",
+      author:"hello world",
+      isbn:"random",
+      available:true,
+      publisher:{
+        name:"y",
+        date:"2021-01-12",
+        country:"ireland"
+      }
+    }]
   })
-
-  try{
-    const newSubscriber = await subscriber.save()
-    res.status(201).json(newSubscriber)
-  }catch(err){
-    res.status(400).json({'message':err})
-  }
 })
 
-//update subscriber
-app.patch('/subscriber/:id',async(req,res)=>{
-  try{
-    const subscriber = await Subscriber.findById(req.params.id)  
-    if(subscriber){ 
-      if(req.body.name !== null){
-        subscriber.name = req.body.name
-        const updatedSubscriber = await subscriber.save()
-        res.json(updatedSubscriber)
-      } 
-    }
-    return res.status(404).json({'message':"can't find subscriber"})
-  }catch(err){
-    res.status(500).json({'message':err.message})
-  }
+app.post('/book', (req, res) => {
+  console.log(req.body);
+  res.sendStatus("200");
 })
 
-// app.get('/coba', (req, res) => {
-//     res.send('coba!')
-// })
-
-// app.get('/coba/:id', (req, res) => {
-//     res.send(req.params.id)
-// })
+app.get('/member', (req, res) => {
+  return res.json({
+    member:[]
+  })
+})
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
