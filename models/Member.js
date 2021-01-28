@@ -9,19 +9,22 @@ const memberSchema = new mongoose.Schema({
         required:true
     },
     borrowedBooks:{
-        books:{
-            type:Array,
-            required:false
-        },
-        schedule:{
-            type:Date,
-            required:false
-        },
-        borrowedDate:{
-            type:Date,
-            required:false
-        }
+        type:Array
     }
+    // borrowedBooks:{
+    //     books:{
+    //         type:Array,
+    //         required:false
+    //     },
+    //     schedule:{
+    //         type:Date,
+    //         required:false
+    //     },
+    //     borrowedDate:{
+    //         type:Date,
+    //         required:false
+    //     }
+    // }
 })
 
 module.exports = mongoose.model('Member',memberSchema)

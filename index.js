@@ -142,9 +142,10 @@ app.patch('/book/:id', async (req, res) => {
 })
 
 app.patch('/member/:id', async(req, res) => {
-
+  
   //pinjam buku
-  if(req.body.borrowedBooks !== null){
+  if(req.body.borrowedBooks){
+    // console.log("this get called")
     try{
       const member = await Member.findById(req.params.id)  
       if(member){ 
@@ -157,13 +158,6 @@ app.patch('/member/:id', async(req, res) => {
       return res.status(500).json({'message':err.message})
     }
   }
-  // members = members.map(member=>{
-  //   if(member._id == req.params.id){
-  //     console.log("match")
-  //     member.borrowedBooks = req.body.borrowedBooks
-  //   }
-  //   return member;
-  // })
 
   try{
     const member = await Member.findById(req.params.id)  
