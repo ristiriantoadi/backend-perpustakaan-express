@@ -11,15 +11,15 @@ const memberSchema = new mongoose.Schema({
     borrowedBooks:{
         books:{
             type:Array,
-            required:true
+            required:false
         },
         schedule:{
             type:Date,
-            required:true
+            required:false
         },
         borrowedDate:{
             type:Date,
-            required:true
+            required:false
         }
     }
 })

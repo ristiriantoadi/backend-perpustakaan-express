@@ -124,17 +124,38 @@ app.patch('/book/:id', async (req, res) => {
   }
 })
 
-app.patch('/member/:id', (req, res) => {
+app.patch('/member/:id', async(req, res) => {
 
-  console.log(req.params.id)
+  // console.log(req.params.id)
 
-  members = members.map(member=>{
-    if(member._id == req.params.id){
-      console.log("match")
-      member.borrowedBooks = req.body.borrowedBooks
+  // members = members.map(member=>{
+  //   if(member._id == req.params.id){
+  //     console.log("match")
+  //     member.borrowedBooks = req.body.borrowedBooks
+  //   }
+  //   return member;
+  // })
+
+  try{
+    const member = await Member.findById(req.params.id)  
+    if(member){ 
+      if(req.body !== null){
+        // book.author = req.body.author
+        // book.title = req.body.author
+        // book.isbn = req.body.isbn
+        // book.available = req.body.available
+        // book.publisher = req.body.publisher
+        member.name = req.body.name
+        member.kelas = req.body.kelas
+        const updatedMember = await member.save()
+        return res.json(updatedMember);
+      } 
     }
-    return member;
-  })
+    return res.status(404).json({'message':"can't find member"})
+  }catch(err){
+    res.status(500).json({'message':err.message})
+  }
+
 
   console.log(members)
   
@@ -150,16 +171,43 @@ app.get('/member', async (req, res) => {
   }catch(err){
     res.json({message:err.message})
   }
-  
-  // return res.json({member:members})
 })
 
-app.post('/member', (req, res) => {
-  // return res.json({
-  //   member:[]
-  // })
-  console.log(req.body)
-  res.sendStatus(200);
+app.delete('/member/:id', async (req, res) => {
+  try{
+    const member = await Member.findById(req.params.id)  
+    if(member){
+      await member.remove()
+      return res.json({'message':'deleted'})  
+    }
+    return res.json({'message':'cannot find member'})
+  }catch(err){
+    res.status(500).json({'message':err.message})
+  }
+})
+
+
+app.post('/member', async (req, res) => {
+  
+  // const newStateFprmCreateMember = {
+  //   name,
+  //   kelas,
+  // };
+
+  const name = req.body.name
+  const kelas = req.body.kelas
+
+  const member = new Member({
+    name,
+    kelas
+  })
+
+  try{
+      const newMember = await member.save()
+      res.status(201).json(newMember)
+  }catch(err){
+      res.status(400).json({'message':err.message})
+  }
 })
 
 app.listen(port, () => {
