@@ -89,23 +89,39 @@ app.post('/book', async(req, res) => {
   }catch(err){
     res.status(400).json({'message':err.message})
   }
-
-  // res.sendStatus("200");
 })
 
-app.patch('/book/:id', (req, res) => {
-  
-  books = books.map(book=>{
-    if(book._id == req.params.id){
-      book.available = req.body.available;
+app.delete('/book/:id', async (req, res) => {
+  try{
+    const book = await Book.findById(req.params.id)  
+    if(book){
+      await book.remove()
+      return res.json({'message':'deleted'})  
     }
-    return book;
-  })
+    return res.json({'message':'cannot find book'})
+  }catch(err){
+    res.status(500).json({'message':err.message})
+  }
+})
 
-  // console.log(books)
-  
-  res.sendStatus("200");
-
+app.patch('/book/:id', async (req, res) => {
+  try{
+    const book = await Book.findById(req.params.id)  
+    if(book){ 
+      if(req.body !== null){
+        book.author = req.body.author
+        book.title = req.body.author
+        book.isbn = req.body.isbn
+        book.available = req.body.available
+        book.publisher = req.body.publisher
+        const updatedBook = await book.save()
+        return res.json(updatedBook);
+      } 
+    }
+    return res.status(404).json({'message':"can't find book"})
+  }catch(err){
+    res.status(500).json({'message':err.message})
+  }
 })
 
 app.patch('/member/:id', (req, res) => {
