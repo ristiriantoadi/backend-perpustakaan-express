@@ -105,6 +105,23 @@ app.delete('/book/:id', async (req, res) => {
 })
 
 app.patch('/book/:id', async (req, res) => {
+
+  //pinjam buku
+  if(req.body.available !== null){
+    try{
+      const book = await Book.findById(req.params.id)  
+      if(book){ 
+        book.available = req.body.available
+        const updatedBook = await book.save()
+        return res.json(updatedBook) 
+      }
+      return res.status(404).json({'message':"can't find subscriber"})
+    }catch(err){
+      return res.status(500).json({'message':err.message})
+    }
+  }
+
+  //edit buku
   try{
     const book = await Book.findById(req.params.id)  
     if(book){ 
@@ -126,8 +143,20 @@ app.patch('/book/:id', async (req, res) => {
 
 app.patch('/member/:id', async(req, res) => {
 
-  // console.log(req.params.id)
-
+  //pinjam buku
+  if(req.body.borrowedBooks !== null){
+    try{
+      const member = await Member.findById(req.params.id)  
+      if(member){ 
+        member.borrowedBooks = req.body.borrowedBooks
+        const updatedMember = await member.save()
+        return res.json(updatedMember) 
+      }
+      return res.status(404).json({'message':"can't find member"})
+    }catch(err){
+      return res.status(500).json({'message':err.message})
+    }
+  }
   // members = members.map(member=>{
   //   if(member._id == req.params.id){
   //     console.log("match")
@@ -140,11 +169,6 @@ app.patch('/member/:id', async(req, res) => {
     const member = await Member.findById(req.params.id)  
     if(member){ 
       if(req.body !== null){
-        // book.author = req.body.author
-        // book.title = req.body.author
-        // book.isbn = req.body.isbn
-        // book.available = req.body.available
-        // book.publisher = req.body.publisher
         member.name = req.body.name
         member.kelas = req.body.kelas
         const updatedMember = await member.save()
@@ -155,12 +179,6 @@ app.patch('/member/:id', async(req, res) => {
   }catch(err){
     res.status(500).json({'message':err.message})
   }
-
-
-  console.log(members)
-  
-  res.sendStatus("200");
-
 })
 
 app.get('/member', async (req, res) => {
