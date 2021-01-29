@@ -9,6 +9,31 @@ app.use(express.json())
 
 require('dotenv').config();
 
+//jwt
+const jwt = require('jsonwebtoken')
+const SECRET_KEY="secret_key"//change this with dotenv
+
+//middleware for verifying token
+function verifyToken(req,res,next){
+  console.log(req.headers)
+  const authHeader = req.headers['token']
+  // const token = authHeader && authHeader.split(' ')[1]
+  const token = authHeader
+
+  if (token == undefined){
+      return res.sendStatus(401)//unauthorized or unauthenticated
+  }
+
+  jwt.verify(token,SECRET_KEY,(err,user)=>{
+      if(err){
+          return res.sendStatus(403)//forbidden
+      }
+      req.user = user
+      next()
+  })
+}
+
+
 //connect ke mongodb
 const mongoose = require('mongoose')
 mongoose.connect(process.env.DATABASE_URL,
@@ -23,13 +48,21 @@ const Member = require("./models/Member")
 
 //routes
 app.post('/login', (req, res) => {
+
+  const email = req.body.email
+  const password = req.body.password    
+  const token = jwt.sign({
+    email,
+    password
+  },SECRET_KEY)
+
     return res.json({
-      token:'token',
+      token:token,
       username:"adi"
     })
 })
 
-app.get('/book', async (req, res) => {
+app.get('/book',verifyToken, async (req, res) => {
   try{
     const books = await Book.find()
     res.json({book:books})
@@ -39,7 +72,7 @@ app.get('/book', async (req, res) => {
 
 })
 
-app.post('/book', async(req, res) => {
+app.post('/book', verifyToken, async(req, res) => {
   const author = req.body.author;
   const title = req.body.title;
   const isbn = req.body.isbn;
@@ -60,7 +93,7 @@ app.post('/book', async(req, res) => {
   }
 })
 
-app.delete('/book/:id', async (req, res) => {
+app.delete('/book/:id', verifyToken, async (req, res) => {
   try{
     const book = await Book.findById(req.params.id)  
     if(book){
@@ -73,7 +106,7 @@ app.delete('/book/:id', async (req, res) => {
   }
 })
 
-app.patch('/book/:id', async (req, res) => {
+app.patch('/book/:id', verifyToken, async (req, res) => {
   //pinjam buku
   if(req.body.available !== null){
     try{
@@ -108,7 +141,7 @@ app.patch('/book/:id', async (req, res) => {
   }
 })
 
-app.patch('/member/:id', async(req, res) => {
+app.patch('/member/:id', verifyToken, async(req, res) => {
   //pinjam buku
   if(req.body.borrowedBooks){
     try{
@@ -140,7 +173,7 @@ app.patch('/member/:id', async(req, res) => {
   }
 })
 
-app.get('/member', async (req, res) => {
+app.get('/member', verifyToken, async (req, res) => {
   try{
     const members = await Member.find()
     res.json({member:members})
@@ -149,7 +182,7 @@ app.get('/member', async (req, res) => {
   }
 })
 
-app.delete('/member/:id', async (req, res) => {
+app.delete('/member/:id', verifyToken, async (req, res) => {
   try{
     const member = await Member.findById(req.params.id)  
     if(member){
@@ -163,7 +196,7 @@ app.delete('/member/:id', async (req, res) => {
 })
 
 
-app.post('/member', async (req, res) => {
+app.post('/member', verifyToken, async (req, res) => {
   const name = req.body.name
   const kelas = req.body.kelas
   const member = new Member({
