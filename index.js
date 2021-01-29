@@ -1,46 +1,15 @@
 const express = require('express')
 const app = express()
 const port = 5000
-const cors = require('cors')
 
+const cors = require('cors')
 app.use(cors())
+
 app.use(express.json())
 
-// var books=[{
-//   _id:"123",
-//   title:"title",
-//   author:"hello world",
-//   isbn:"random",
-//   available:10,
-//   publisher:{
-//     name:"y",
-//     date:"2021-01-12",
-//     country:"ireland"
-//   }
-// }]
-
-// var members=[{
-//   _id:"111",
-//   name:"adi",
-//   kelas:"2a",
-//   //borrowedBooks: {books: Array(0), schedule: "", borrowedDate: "2021-01-27T23:05:20.815Z"}
-//   //can only borrow books one time
-//   borrowedBooks:{
-//     books:[]
-//   }
-// },
-// {
-//   _id:112,
-//   name:"ananta",
-//   kelas:"2a",
-//   borrowedBooks:{
-//     books:[]
-//   }
-// }]
-
-
 require('dotenv').config();
-console.log(process.env.DATABASE_URL)
+
+//connect ke mongodb
 const mongoose = require('mongoose')
 mongoose.connect(process.env.DATABASE_URL,
 { useNewUrlParser: true, useUnifiedTopology: true})
@@ -48,9 +17,11 @@ const db = mongoose.connection
 db.on('error',(error)=>console.error(error))
 db.once('open',()=>console.log('connected to database'))
 
+//import schema Mongoose
 const Book = require("./models/Book")
 const Member = require("./models/Member")
 
+//routes
 app.post('/login', (req, res) => {
     return res.json({
       token:'token',
@@ -59,7 +30,6 @@ app.post('/login', (req, res) => {
 })
 
 app.get('/book', async (req, res) => {
-  
   try{
     const books = await Book.find()
     res.json({book:books})
@@ -82,7 +52,6 @@ app.post('/book', async(req, res) => {
     available,
     publisher
   })
-  console.log(book);
   try{
     const newBook = await book.save()
     res.status(201).json(newBook)
@@ -105,7 +74,6 @@ app.delete('/book/:id', async (req, res) => {
 })
 
 app.patch('/book/:id', async (req, res) => {
-
   //pinjam buku
   if(req.body.available !== null){
     try{
@@ -120,7 +88,6 @@ app.patch('/book/:id', async (req, res) => {
       return res.status(500).json({'message':err.message})
     }
   }
-
   //edit buku
   try{
     const book = await Book.findById(req.params.id)  
@@ -142,10 +109,8 @@ app.patch('/book/:id', async (req, res) => {
 })
 
 app.patch('/member/:id', async(req, res) => {
-  
   //pinjam buku
   if(req.body.borrowedBooks){
-    // console.log("this get called")
     try{
       const member = await Member.findById(req.params.id)  
       if(member){ 
@@ -158,7 +123,7 @@ app.patch('/member/:id', async(req, res) => {
       return res.status(500).json({'message':err.message})
     }
   }
-
+  //edit member
   try{
     const member = await Member.findById(req.params.id)  
     if(member){ 
@@ -176,7 +141,6 @@ app.patch('/member/:id', async(req, res) => {
 })
 
 app.get('/member', async (req, res) => {
-  
   try{
     const members = await Member.find()
     res.json({member:members})
@@ -200,20 +164,12 @@ app.delete('/member/:id', async (req, res) => {
 
 
 app.post('/member', async (req, res) => {
-  
-  // const newStateFprmCreateMember = {
-  //   name,
-  //   kelas,
-  // };
-
   const name = req.body.name
   const kelas = req.body.kelas
-
   const member = new Member({
     name,
     kelas
   })
-
   try{
       const newMember = await member.save()
       res.status(201).json(newMember)
