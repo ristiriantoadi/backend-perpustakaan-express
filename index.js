@@ -9,17 +9,13 @@ require('dotenv').config();
 //jwt
 const jwt = require('jsonwebtoken')
 const SECRET_KEY="secret_key"//change this with dotenv
-
 //middleware for verifying token
 function verifyToken(req,res,next){
   const authHeader = req.headers['token']
-  // const token = authHeader && authHeader.split(' ')[1]
   const token = authHeader
-
   if (token == undefined){
       return res.sendStatus(401)//unauthorized or unauthenticated
   }
-
   jwt.verify(token,SECRET_KEY,(err,user)=>{
       if(err){
           return res.sendStatus(403)//forbidden
@@ -29,7 +25,6 @@ function verifyToken(req,res,next){
   })
 }
 
-
 //connect ke mongodb
 const mongoose = require('mongoose')
 mongoose.connect(process.env.DATABASE_URL,
@@ -37,7 +32,6 @@ mongoose.connect(process.env.DATABASE_URL,
 const db = mongoose.connection
 db.on('error',(error)=>console.error(error))
 db.once('open',()=>console.log('connected to database'))
-
 //import schema Mongoose
 const Book = require("./models/Book")
 const Member = require("./models/Member")
@@ -45,7 +39,6 @@ const User = require("./models/User")
 
 //routes
 app.post('/login', async (req, res) => {
-
   const email = req.body.email
   const password = req.body.password
   try{
@@ -54,13 +47,10 @@ app.post('/login', async (req, res) => {
       email:user.email,
       password:user.password
     },SECRET_KEY)
-  
-      return res.json({
-        token:token,
-        username:user.username
-      })
-  
-  
+    return res.json({
+      token:token,
+      username:user.username
+    })
   }catch(err){
     res.json({message:err.message})
   }
@@ -70,20 +60,17 @@ app.post('/user',async (req,res)=>{
   const username = req.body.username
   const email = req.body.email
   const password = req.body.password
-
   const user = new User({
     username,
     email,
     password
   })
-
 try{
     const newUser = await user.save()
     res.status(201).json(newUser)
 }catch(err){
     res.status(400).json({'message':err.message})
 }
-  
 })
 
 app.get('/book',verifyToken, async (req, res) => {
@@ -93,7 +80,6 @@ app.get('/book',verifyToken, async (req, res) => {
   }catch(err){
     res.json({message:err.message})
   }
-
 })
 
 app.post('/book', verifyToken, async(req, res) => {
@@ -219,7 +205,7 @@ app.delete('/member/:id', verifyToken, async (req, res) => {
   }
 })
 
-
+//tambah member
 app.post('/member', verifyToken, async (req, res) => {
   const name = req.body.name
   const kelas = req.body.kelas
