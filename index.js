@@ -15,7 +15,6 @@ const SECRET_KEY="secret_key"//change this with dotenv
 
 //middleware for verifying token
 function verifyToken(req,res,next){
-  console.log(req.headers)
   const authHeader = req.headers['token']
   // const token = authHeader && authHeader.split(' ')[1]
   const token = authHeader
@@ -45,21 +44,49 @@ db.once('open',()=>console.log('connected to database'))
 //import schema Mongoose
 const Book = require("./models/Book")
 const Member = require("./models/Member")
+const User = require("./models/User")
 
 //routes
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
 
   const email = req.body.email
-  const password = req.body.password    
-  const token = jwt.sign({
+  const password = req.body.password
+  try{
+    const user = await User.findOne({ email,password }).exec();
+    const token = jwt.sign({
+      email:user.email,
+      password:user.password
+    },SECRET_KEY)
+  
+      return res.json({
+        token:token,
+        username:user.username
+      })
+  
+  
+  }catch(err){
+    res.json({message:err.message})
+  }
+})
+
+app.post('/user',async (req,res)=>{
+  const username = req.body.username
+  const email = req.body.email
+  const password = req.body.password
+
+  const user = new User({
+    username,
     email,
     password
-  },SECRET_KEY)
+  })
 
-    return res.json({
-      token:token,
-      username:"adi"
-    })
+try{
+    const newUser = await user.save()
+    res.status(201).json(newUser)
+}catch(err){
+    res.status(400).json({'message':err.message})
+}
+  
 })
 
 app.get('/book',verifyToken, async (req, res) => {
