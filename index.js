@@ -38,7 +38,7 @@ const Member = require("./models/Member")
 const User = require("./models/User")
 
 //routes
-app.post('/login', async (req, res) => {
+app.post('/api/login', async (req, res) => {
   const email = req.body.email
   const password = req.body.password
   try{
@@ -56,7 +56,7 @@ app.post('/login', async (req, res) => {
   }
 })
 
-app.post('/user',async (req,res)=>{
+app.post('/api/user',async (req,res)=>{
   const username = req.body.username
   const email = req.body.email
   const password = req.body.password
@@ -73,7 +73,7 @@ try{
 }
 })
 
-app.get('/book',verifyToken, async (req, res) => {
+app.get('/api/book',verifyToken, async (req, res) => {
   try{
     const books = await Book.find()
     res.json({book:books})
@@ -82,7 +82,7 @@ app.get('/book',verifyToken, async (req, res) => {
   }
 })
 
-app.post('/book', verifyToken, async(req, res) => {
+app.post('/api/book', verifyToken, async(req, res) => {
   const author = req.body.author;
   const title = req.body.title;
   const isbn = req.body.isbn;
@@ -103,7 +103,7 @@ app.post('/book', verifyToken, async(req, res) => {
   }
 })
 
-app.delete('/book/:id', verifyToken, async (req, res) => {
+app.delete('/api/book/:id', verifyToken, async (req, res) => {
   try{
     const book = await Book.findById(req.params.id)  
     if(book){
@@ -116,7 +116,7 @@ app.delete('/book/:id', verifyToken, async (req, res) => {
   }
 })
 
-app.patch('/book/:id', verifyToken, async (req, res) => {
+app.patch('/api/book/:id', verifyToken, async (req, res) => {
   //pinjam buku
   if(req.body.available !== null){
     try{
@@ -151,7 +151,7 @@ app.patch('/book/:id', verifyToken, async (req, res) => {
   }
 })
 
-app.patch('/member/:id', verifyToken, async(req, res) => {
+app.patch('/api/member/:id', verifyToken, async(req, res) => {
   //pinjam buku
   if(req.body.borrowedBooks){
     try{
@@ -183,7 +183,7 @@ app.patch('/member/:id', verifyToken, async(req, res) => {
   }
 })
 
-app.get('/member', verifyToken, async (req, res) => {
+app.get('/api/member', verifyToken, async (req, res) => {
   try{
     const members = await Member.find()
     res.json({member:members})
@@ -192,7 +192,7 @@ app.get('/member', verifyToken, async (req, res) => {
   }
 })
 
-app.delete('/member/:id', verifyToken, async (req, res) => {
+app.delete('/api/member/:id', verifyToken, async (req, res) => {
   try{
     const member = await Member.findById(req.params.id)  
     if(member){
@@ -206,7 +206,7 @@ app.delete('/member/:id', verifyToken, async (req, res) => {
 })
 
 //tambah member
-app.post('/member', verifyToken, async (req, res) => {
+app.post('/api/member', verifyToken, async (req, res) => {
   const name = req.body.name
   const kelas = req.body.kelas
   const member = new Member({
