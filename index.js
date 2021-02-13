@@ -1,10 +1,15 @@
 const express = require('express')
 const app = express()
+const path = require('path');
 const port = 5000
 const cors = require('cors')
 app.use(cors())
 app.use(express.json())
 require('dotenv').config();
+
+
+// Serve the static files from the React app
+app.use(express.static(path.join(__dirname, 'client/build')));
 
 //jwt
 const jwt = require('jsonwebtoken')
@@ -117,6 +122,27 @@ app.delete('/api/book/:id', verifyToken, async (req, res) => {
 })
 
 app.patch('/api/book/:id', verifyToken, async (req, res) => {
+  console.log("api hit")
+  //edit buku
+  if(req.body.author !== null){
+    try{
+      const book = await Book.findById(req.params.id)  
+      if(book){ 
+        if(req.body !== null){
+          book.author = req.body.author
+          book.title = req.body.title
+          book.isbn = req.body.isbn
+          book.available = req.body.available
+          book.publisher = req.body.publisher
+          const updatedBook = await book.save()
+          return res.json(updatedBook);
+        } 
+      }
+      return res.status(404).json({'message':"can't find book"})
+    }catch(err){
+      res.status(500).json({'message':err.message})
+    }  
+  }
   //pinjam buku
   if(req.body.available !== null){
     try{
@@ -130,24 +156,6 @@ app.patch('/api/book/:id', verifyToken, async (req, res) => {
     }catch(err){
       return res.status(500).json({'message':err.message})
     }
-  }
-  //edit buku
-  try{
-    const book = await Book.findById(req.params.id)  
-    if(book){ 
-      if(req.body !== null){
-        book.author = req.body.author
-        book.title = req.body.author
-        book.isbn = req.body.isbn
-        book.available = req.body.available
-        book.publisher = req.body.publisher
-        const updatedBook = await book.save()
-        return res.json(updatedBook);
-      } 
-    }
-    return res.status(404).json({'message':"can't find book"})
-  }catch(err){
-    res.status(500).json({'message':err.message})
   }
 })
 
@@ -220,6 +228,11 @@ app.post('/api/member', verifyToken, async (req, res) => {
       res.status(400).json({'message':err.message})
   }
 })
+
+//spa
+app.get('*', (req,res) =>{
+  res.sendFile(path.join(__dirname+'/client/build/index.html'));
+});
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
